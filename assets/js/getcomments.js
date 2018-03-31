@@ -15,8 +15,8 @@
       var SCOPES = 'https://www.googleapis.com/auth/youtube.readonly https://www.googleapis.com/auth/youtube.force-ssl https://www.googleapis.com/auth/cloud-language';
 
       
-    //   var authorizeButton = document.getElementById('signup-btn');
-    //   var signoutButton = document.getElementById('signout-button');
+      var authorizeButton = document.getElementById('signup-btn');
+      var signoutButton = document.getElementById('signout-btn');
 
       /**
        *  On load, called to load the auth2 library and API client library.
@@ -40,15 +40,15 @@
         }).then(function () {
           // Listen for sign-in state changes.
           console.log(gapi.auth2.getAuthInstance().currentUser.get());
-          getChannel();
           
-        //   gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
+          gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
+          getChannel();
           
 
           // Handle the initial sign-in state.
         //   updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
-        //   authorizeButton.onclick = handleAuthClick;
-        //   signoutButton.onclick = handleSignoutClick;
+          authorizeButton.onclick = handleAuthClick;
+          signoutButton.onclick = handleSignoutClick;
         });
       }
 
@@ -61,14 +61,14 @@
       // Login button isn't implemented with the apis yet
       function updateSigninStatus(isSignedIn) {
         if (isSignedIn) {
-        //   authorizeButton.style.display = 'block';
-        //   signoutButton.style.display = 'block';
+          authorizeButton.style.display = 'block';
+          signoutButton.style.display = 'block';
         
 
 
         } else {
-        //   authorizeButton.style.display = 'block';
-        //   signoutButton.style.display = 'none';
+          authorizeButton.style.display = 'block';
+          signoutButton.style.display = 'none';
         }
       }
 
