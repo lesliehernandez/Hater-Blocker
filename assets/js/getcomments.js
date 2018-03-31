@@ -156,6 +156,10 @@
         }).then(function(response) {
             // var videoIds = response.result.items;
             console.log(response.result.items[0]); 
+
+            var video = $('<div>');
+            video.text(response.result.items[0]);
+            $('#video-space').append('hjgrfjncd');
         });
     }
     // Get comments from the video specified in videoId
@@ -187,10 +191,47 @@
             
         }).then(function(response) {
             // var videoIds = response.result.items;
+            console.log(response.result.items[0].snippet);
+
+            var userImg = response.result.items[0].snippet.authorProfileImageUrl;
             var author = response.result.items[0].snippet.authorDisplayName;
             var commentText = response.result.items[0].snippet.textDisplay; 
+            // Deletes bad comments, need a button to delete them
             initGapi(commentText, commentId);
-            
+            // Display comments
+
+            var comment = $('<div>');
+            //'<span><img src='+userImg+' style="width: 30px; float: left;"/></span>
+            comment.append('<span style="float: left;">' + author + " " + commentText+'</span><br>');
+            $('#view-comments').append(comment);
+
+
+        /*
+        format for adding comments to real comments section
+        
+        <li class="media">
+            <div class="media-left is-hidden-mobile">
+                <a href="#"><img src="https://place-hold.it/250x250" alt=""></a>
+            </div>
+
+            <div class="media-body">
+                <div class="media-heading">
+                    <a href="#" class="text-semibold">Henry Rodstein</a>
+                    <span class="timestamp">2 minutes ago</span>
+                </div>
+
+                <p>Lorem ipsum dolor sit amet, nec ea error laoreet. Usu ex magna docendi gubergren. Sit cu diceret officiis perpetua.</p>
+
+                <ul class="comment-controls">
+                    <li>2 <a href="#"><i class="material-icons">thumb_up</i></a><a href="#"><i class="icon-arrow-down22 text-danger"></i></a></li>
+                    <li><a href="#">Answer</a></li>
+                </ul>
+            </div>
+        </li> */
+
+
+
+
         });
     }
     // Sets the moderation status of a comment as rejected
