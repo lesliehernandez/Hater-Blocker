@@ -17,10 +17,13 @@
       
       var authorizeButton = document.getElementById('signup-btn');
       var signoutButton = document.getElementById('signout-btn');
+      var dashboardButton = document.getElementById('dashboard-btn');
 
       /**
        *  On load, called to load the auth2 library and API client library.
        */
+
+
       $(document).ready(handleClientLoad);
 
       function handleClientLoad() {
@@ -32,6 +35,7 @@
        *  Initializes the API client library and sets up sign-in state
        *  listeners.
        */
+
       function initClient() {
         gapi.client.init({
           discoveryDocs: DISCOVERY_DOCS,
@@ -39,18 +43,22 @@
           scope: SCOPES
         }).then(function () {
           // Listen for sign-in state changes.
-          console.log(gapi.auth2.getAuthInstance().currentUser.get());
+            console.log(gapi.auth2.getAuthInstance().currentUser.get());
           
-          gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
-          getChannel();
-          
-
-          // Handle the initial sign-in state.
-        //   updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
-          authorizeButton.onclick = handleAuthClick;
-          signoutButton.onclick = handleSignoutClick;
+            gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
+       
+            if($('body').is('.landing')) {
+                authorizeButton.onclick = handleAuthClick;
+                signoutButton.onclick = handleSignoutClick;
+            }
+            else if ($('body').is('.dashboard-page')) {
+                getChannel();
+            }
+       
         });
       }
+
+
 
       /**
        *  Called when the signed in status changes, to update the UI
@@ -136,13 +144,7 @@
             videoIds.forEach(video => {
                 // For each video in the playlist, save the videoId
                 var videoId = video.snippet.resourceId.videoId;
-
-                // Call getVideo
-                // getVideo(videoId);
-                // Set moderation status to rejected, Call with commentId after detected as bad
-                // setModerationStatus('Ugz5WpmCSR7SW4gOj8x4AaABAg');
-                // console.log('after delete');
-                // call getComments with each videoId
+                getVideo(videoId);
                 getComments(videoId);
             });
         });
@@ -157,9 +159,17 @@
             // var videoIds = response.result.items;
             console.log(response.result.items[0]); 
 
+            var videoSpace = $('<div>');
+
             var video = $('<div>');
-            video.text(response.result.items[0]);
-            $('#video-space').append('hjgrfjncd');
+            // console.log(response.result.items[0].contentDetails);
+            video.append('<span style:"float:left;clear:none;"><img src=' + response.result.items[0].snippet.thumbnails.default.url + ' style="width:60px;box-shadow:0px 0px 0px black;"/><p>' + response.result.items[0].snippet.title + '</p></span>');
+            video.append('<br><br>')
+            
+            videoSpace.append(video);
+            $('.image-overlay').prepend(video);
+
+
         });
     }
     // Get comments from the video specified in videoId
@@ -176,8 +186,6 @@
             // Maybe call setModStatus instead
             commentIds.forEach(comment => {
                 // var videoId = video.snippet.resourceId.videoId;
-                // console.log(comment.id);
-                // getVideo(videoId);
                 getComment(comment.id);
             });
         });
@@ -200,38 +208,39 @@
             initGapi(commentText, commentId);
             // Display comments
 
-            var comment = $('<div>');
-            //'<span><img src='+userImg+' style="width: 30px; float: left;"/></span>
-            comment.append('<span style="float: left;">' + author + " " + commentText+'</span><br>');
-            $('#view-comments').append(comment);
+            // Show replies
+            var listItem = $("<li>");
+                listItem.addClass('media');
 
+            var commenterImage = $('<div>');
+                commenterImage.addClass('media-left is-hidden-mobile')
+                              .html('<a href="#"><img src=' + userImg + ' alt=""></a>');
+            
+                listItem.append(commenterImage);
 
-        /*
-        format for adding comments to real comments section
+            var mediaBody = $('<div>');
+                mediaBody.addClass('media-body');
+
+            var mediaHeading = $('<div>');
+                mediaHeading.addClass('media-heading');
+                mediaHeading.append('<a href="#" class="text-semibold">' + author + '</a>')
+                            // Use library to get how long ago they posted it
+                            // Order comments by data send
+                            .append('<span class="timestamp">2 minutes ago</span>');
+            
+                mediaBody.append(mediaHeading)
+                         .append('<p>' + commentText + '</p>');
+            
+            var commentControls = $('<ul>');
+                commentControls.addClass('comment-controls')
+                               .append('<li>' + response.result.items[0].snippet.likeCount + ' ' + '<a href="#"><i class="material-icons">thumb_up</i></a><a href="#"><i class="icon-arrow-down22 text-danger"></i></a></li>');
+                
+                mediaBody.append(commentControls);
+
+                listItem.append(mediaBody);
+
+            $('.comment-list').append(listItem);
         
-        <li class="media">
-            <div class="media-left is-hidden-mobile">
-                <a href="#"><img src="https://place-hold.it/250x250" alt=""></a>
-            </div>
-
-            <div class="media-body">
-                <div class="media-heading">
-                    <a href="#" class="text-semibold">Henry Rodstein</a>
-                    <span class="timestamp">2 minutes ago</span>
-                </div>
-
-                <p>Lorem ipsum dolor sit amet, nec ea error laoreet. Usu ex magna docendi gubergren. Sit cu diceret officiis perpetua.</p>
-
-                <ul class="comment-controls">
-                    <li>2 <a href="#"><i class="material-icons">thumb_up</i></a><a href="#"><i class="icon-arrow-down22 text-danger"></i></a></li>
-                    <li><a href="#">Answer</a></li>
-                </ul>
-            </div>
-        </li> */
-
-
-
-
         });
     }
     // Sets the moderation status of a comment as rejected
