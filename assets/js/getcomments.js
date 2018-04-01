@@ -19,6 +19,8 @@
       var signoutButton = document.getElementById('signout-btn');
       var dashboardButton = document.getElementById('dashboard-btn');
 
+      var deleteComments = 0;
+
       /**
        *  On load, called to load the auth2 library and API client library.
        */
@@ -28,7 +30,6 @@
 
       function handleClientLoad() {
         gapi.load('client:auth2', initClient);
-        // console.log(initClient);
       }
 
       /**
@@ -53,6 +54,11 @@
             }
             else if ($('body').is('.dashboard-page')) {
                 getChannel();
+                $('#deleteBadComments').on('click', function () {  
+                    deleteComments = 1;
+                    getChannel();
+                    // Need to fix showing not showing bad comment if it is deleted last          
+                });
             }
        
         });
@@ -138,6 +144,8 @@
             // User can choose number of videos to show
             'maxResults' : 20
         }).then(function(response) {
+            $('.comment-list').empty();
+            
             // Save array of video responses
             var videoIds = response.result.items;
 
@@ -205,6 +213,7 @@
             var author = response.result.items[0].snippet.authorDisplayName;
             var commentText = response.result.items[0].snippet.textDisplay; 
             // Deletes bad comments, need a button to delete them
+        
             initGapi(commentText, commentId);
             // Display comments
 
@@ -219,7 +228,9 @@
                 listItem.append(commenterImage);
 
             var mediaBody = $('<div>');
-                mediaBody.addClass('media-body');
+                mediaBody.addClass('media-body')
+                         .attr('text', commentText);
+
 
             var mediaHeading = $('<div>');
                 mediaHeading.addClass('media-heading');
@@ -274,8 +285,16 @@
             var commentScore = JSON.stringify(r.result.entities[0].sentiment.score);
             console.log(content + " Score: " + commentScore);
 
-            if(commentScore <= -0.6) {
+            if(commentScore <= -0.6 && deleteComments == 1) {
                 setModerationStatus(id);
+            }
+            else if(commentScore <= -0.6 && deleteComments == 0) {
+                // var cmt = $(".media").find("[text='" + content + "']");
+                $(".media-body:contains(" + content + ")").css('border', '2px solid red');
+
+                    // console.log($(this));                
+                    // cmt.css('border', '2px solid red');
+
             }
         }) 
     } 
