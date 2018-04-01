@@ -214,7 +214,7 @@
 
             var commenterImage = $('<div>');
                 commenterImage.addClass('media-left is-hidden-mobile')
-                              .html('<a href="#"><img src=' + userImg + ' alt=""></a>');
+                              .html('<a href=' +  response.result.items[0].snippet.authorChannelUrl + '><img src=' + userImg + ' alt=""></a>');
             
                 listItem.append(commenterImage);
 
@@ -223,7 +223,7 @@
 
             var mediaHeading = $('<div>');
                 mediaHeading.addClass('media-heading');
-                mediaHeading.append('<a href="#" class="text-semibold">' + author + '</a>')
+                mediaHeading.append('<a href=' + response.result.items[0].snippet.authorChannelUrl + ' class="text-semibold">' + author + '</a>')
                             // Use library to get how long ago they posted it
                             // Order comments by data send
                             .append('<span class="timestamp">2 minutes ago</span>');
@@ -233,13 +233,13 @@
             
             var commentControls = $('<ul>');
                 commentControls.addClass('comment-controls')
-                               .append('<li>' + response.result.items[0].snippet.likeCount + ' ' + '<a href="#"><i class="material-icons">thumb_up</i></a><a href="#"><i class="icon-arrow-down22 text-danger"></i></a></li>');
+                               .append('<li>' + response.result.items[0].snippet.likeCount + ' ' + '<i class="material-icons">thumb_up</i></a><a href="#"><i class="icon-arrow-down22 text-danger"></i></a></li>');
                 
                 mediaBody.append(commentControls);
 
                 listItem.append(mediaBody);
 
-            $('.comment-list').append(listItem);
+            $('.comment-list').prepend(listItem);
         
         });
     }
