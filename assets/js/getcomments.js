@@ -57,10 +57,14 @@ function initClient() {
         else if ($('body').is('.dashboard-video')) {
             var currVideo = localStorage.getItem("currVideo");
             getVideo(currVideo, 380);
+            $('.comment-list').empty();
             getComments(currVideo);
-            $('#deleteBadComments').on('click', function () {  
+            $('#deleteBadComments').on('click', function (e) {  
+                e.preventDefault();
                 deleteComments = 1;
-                getChannel();
+                getComments(currVideo);
+               
+
                 // Need to fix showing not showing bad comment if it is deleted last          
             });
         }
@@ -172,7 +176,7 @@ function getVideo(vidId, size){
              .attr('href', 'dashboard-video.html');
 
         // videoSpace.append(video);
-        $('.video-space').prepend(video);
+        $('.image-overlay').prepend(video);
     });
 }
 
@@ -217,19 +221,26 @@ function getComment(commentId){
         var author = response.result.items[0].snippet.authorDisplayName;
         var commentText = response.result.items[0].snippet.textDisplay; 
         // Deletes bad comments, need a button to delete them
-    
-        initGapi(commentText, commentId);
+        
+        var numComments = $('#numComments').text();
+
         // Display comments
-        if(deleteComments == 1) {// and is checked
-            // setModerationStatus(id);
-            console.log("hi: "+$('[findText="'+content+'"]').prop('checked'));
+        if(deleteComments == 1 && $('[comment="'+commentId+'"]').prop('checked')) {
+            setModerationStatus(commentId);
+            if($('#' + commentId).length)
+                $('#' + commentId).empty();
+            
+            $('#numComments').text(numComments - 1);
+            // console.log("hi: "+$('[comment="'+commentId+'"]').prop('checked'));
         }
         // else show comment
         else {
-
+            if($('#' + commentId).length)
+                $('#' + commentId).empty();
             // Show replies
             var listItem = $("<li>");
-                listItem.addClass('media');
+                listItem.addClass('media')
+                        .attr('id', commentId);
 
             var commenterImage = $('<div>');
                 commenterImage.addClass('media-left is-hidden-mobile')
@@ -253,7 +264,7 @@ function getComment(commentId){
                 checkBox.addClass('check-box')
                         .attr('type', 'checkbox')
                         .html('<span class="checkmark"></span>')
-                        .attr('findText', commentText);
+                        .attr('comment', commentId);
             
                 mediaBody.append(mediaHeading, checkBox)
                         .append('<p>' + commentText + '</p>');
@@ -267,6 +278,9 @@ function getComment(commentId){
                 listItem.append(mediaBody);
 
             $('.comment-list').prepend(listItem);
+
+            initGapi(commentText, commentId);
+
         }
     
     });
@@ -303,11 +317,11 @@ function initGapi(content, id) {
         //     // setModerationStatus(id);
         //     console.log("hi: "+$('[findText="'+content+'"]').prop('checked'));
         // }
-        if(commentScore <= -0.6 && deleteComments == 0) {
+        if(commentScore <= -0.6) {
 
             $(".media-body:contains(" + content + ")").css('border', '2px solid red');
 
-            $('[findText="'+content+'"]').prop('checked',true);
+            $('[comment="'+id+'"]').prop('checked',true);
         }
     }) 
 } 
