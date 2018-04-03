@@ -5,7 +5,8 @@
       */
 
       // Client ID and API key from the Developer Console
-      var CLIENT_ID = '523678269215-jaeetbolcu823451vj1mj3hcs0sj7t9j.apps.googleusercontent.com';
+    //   var CLIENT_ID = '523678269215-jaeetbolcu823451vj1mj3hcs0sj7t9j.apps.googleusercontent.com';
+    var CLIENT_ID = '523678269215-p0ja18cn4qk6htkeh576j43lptlmqbds.apps.googleusercontent.com';
 
       // Array of API discovery doc URLs for APIs used by the quickstart
       var DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest", "https://language.googleapis.com/$discovery/rest?version=v1"];
@@ -198,7 +199,7 @@
             });
         });
     }
-    // May not need this request
+
     function getComment(commentId){
         var request = gapi.client.request({
             'method': 'GET',
@@ -233,13 +234,19 @@
 
 
             var mediaHeading = $('<div>');
-                mediaHeading.addClass('media-heading');
-                mediaHeading.append('<a href=' + response.result.items[0].snippet.authorChannelUrl + ' class="text-semibold">' + author + '</a>')
+                mediaHeading.addClass('media-heading')
+                            .append('<a href=' + response.result.items[0].snippet.authorChannelUrl + ' class="text-semibold">' + author + '</a>')
                             // Use library to get how long ago they posted it
                             // Order comments by data send
-                            .append('<span class="timestamp">2 minutes ago</span>');
+                            .append('<span class="timestamp">2 minutes ago</span>')
+                            
+            var checkBox = $('<input>');
+                checkBox.addClass('check-box')
+                        .attr('type', 'checkbox')
+                        .html('<span class="checkmark"></span>')
+                        .attr('findText', commentText);
             
-                mediaBody.append(mediaHeading)
+                mediaBody.append(mediaHeading, checkBox)
                          .append('<p>' + commentText + '</p>');
             
             var commentControls = $('<ul>');
@@ -285,16 +292,16 @@
             var commentScore = JSON.stringify(r.result.entities[0].sentiment.score);
             console.log(content + " Score: " + commentScore);
 
-            if(commentScore <= -0.6 && deleteComments == 1) {
-                setModerationStatus(id);
+            if(deleteComments == 1) {
+                // setModerationStatus(id);
+                console.log("hi: "+$('[findText="'+content+'"]').prop('checked'));
+                document.getElementBy
             }
             else if(commentScore <= -0.6 && deleteComments == 0) {
-                // var cmt = $(".media").find("[text='" + content + "']");
+
                 $(".media-body:contains(" + content + ")").css('border', '2px solid red');
 
-                    // console.log($(this));                
-                    // cmt.css('border', '2px solid red');
-
+                $('[findText="'+content+'"]').prop('checked',true);
             }
         }) 
     } 
