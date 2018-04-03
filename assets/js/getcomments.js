@@ -228,7 +228,7 @@ function getComment(commentId){
         if(deleteComments == 1 && $('[comment="'+commentId+'"]').prop('checked')) {
             setModerationStatus(commentId);
             if($('#' + commentId).length)
-                $('#' + commentId).empty();
+                $('#' + commentId).remove();
             
             $('#numComments').text(numComments - 1);
             // console.log("hi: "+$('[comment="'+commentId+'"]').prop('checked'));
@@ -236,7 +236,7 @@ function getComment(commentId){
         // else show comment
         else {
             if($('#' + commentId).length)
-                $('#' + commentId).empty();
+                $('#' + commentId).remove();
             // Show replies
             var listItem = $("<li>");
                 listItem.addClass('media')
