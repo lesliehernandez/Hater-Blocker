@@ -4,17 +4,14 @@
     user is authenticated. Haven't figured out how to put that into an ajax request yet
 */
 
-// Client ID and API key from the Developer Console
-//   var CLIENT_ID = '523678269215-jaeetbolcu823451vj1mj3hcs0sj7t9j.apps.googleusercontent.com';
+// Client ID from the Developer Console
 var CLIENT_ID = '523678269215-p0ja18cn4qk6htkeh576j43lptlmqbds.apps.googleusercontent.com';
 
 // Array of API discovery doc URLs for APIs used by the quickstart
 var DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest", "https://language.googleapis.com/$discovery/rest?version=v1"];
 
-// Authorization scopes required by the API. If using multiple scopes,
-// separated them with spaces.
+// Authorization scopes required by the API. 
 var SCOPES = 'https://www.googleapis.com/auth/youtube.readonly https://www.googleapis.com/auth/youtube.force-ssl https://www.googleapis.com/auth/cloud-language';
-
 
 var authorizeButton = document.getElementById('signup-btn');
 var signoutButton = document.getElementById('signout-btn');
@@ -22,11 +19,9 @@ var dashboardButton = document.getElementById('dashboard-btn');
 
 var deleteComments = 0;
 
-
 /*
  *  On load, called to load the auth2 library and API client library.
  */
-
 
 $(document).ready(handleClientLoad);
 
@@ -57,19 +52,17 @@ function initClient() {
 
         }
         else if ($('body').is('.dashboard-feed')) {
-            $(this).empty();
             getChannel();
+        }
+        else if ($('body').is('.dashboard-video')) {
+            var currVideo = localStorage.getItem("currVideo");
+            getVideo(currVideo, 380);
+            getComments(currVideo);
             $('#deleteBadComments').on('click', function () {  
                 deleteComments = 1;
                 getChannel();
                 // Need to fix showing not showing bad comment if it is deleted last          
             });
-        }
-        else if ($('body').is('.dashboard-video')) {
-            var currVideo = localStorage.getItem("currVideo");
-            getVideo(currVideo);
-            getComments(currVideo);
-          
         }
     });
 }
@@ -129,7 +122,6 @@ function getChannel() {
     }).then(function(response) {
 
         var channel = response.result.items[0];
-        console.log(channel);
 
         // Save the id of their uploaded videos playlist
         var playlistId = channel.contentDetails.relatedPlaylists.uploads;
@@ -157,38 +149,30 @@ function getPlaylist(playlistId){
         videoIds.forEach(video => {
             // For each video in the playlist, save the videoId
             var videoId = video.snippet.resourceId.videoId;
-            getVideo(videoId);
+            getVideo(videoId, 60);
             // getComments(videoId);
         });
     });
 }
 // May not need this request
-function getVideo(vidId){
+function getVideo(vidId, size){
     var request = gapi.client.request({
         'method': 'GET',
         'path': '/youtube/v3/videos',
         'params': {'part': 'snippet,contentDetails,statistics','id' : vidId}
     }).then(function(response) {
         // var videoIds = response.result.items;
-        console.log(response.result.items[0].id); 
-
-        // var videoSpace = $('<div>');
-        //     videoSpace.addClass('video');         
-        //     videoSpace.attr('data-vidid', response.result.items[0].id);
-
+        console.log(response.result.items[0]); 
 
         var video = $('<a>');
-        // console.log(response.result.items[0].contentDetails);
-        video.append('<span style:"float:left;clear:none;"><img src=' + response.result.items[0].snippet.thumbnails.default.url + ' style="width:60px;box-shadow:0px 0px 0px black;"/><p>' + response.result.items[0].snippet.title + '</p></span>');
+        video.append('<span style:"float:left;clear:none;text-decoration:none;"><img src=' + response.result.items[0].snippet.thumbnails.high.url + ' style="width:'+size+'px;box-shadow:0px 0px 0px black;"/><p style="color:black;">' + response.result.items[0].snippet.title + '</p></span>');
         video.append('<br><br>')
              .addClass('video')       
              .attr('data-vidId', response.result.items[0].id)
              .attr('href', 'dashboard-video.html');
 
-
-        
         // videoSpace.append(video);
-        $('.image-overlay').prepend(video);
+        $('.video-space').prepend(video);
     });
 }
 
@@ -196,17 +180,8 @@ $(document).on('click', '.video', function() {
     console.log('data: ' + $(this).data('vidid'));
     if($(this).data('vidid') != undefined) {
         localStorage.setItem("currVideo",$(this).data('vidid'));
-
-        // currVideo = $(this).data('vidid');
-        // getComments(id);
     }
-  
-    
 })
-/**
- * for one video view
- * onclick, call get coments with videoid 
- */
 
 // Get comments from the video specified in videoId
 function getComments(vidId){
@@ -218,7 +193,7 @@ function getComments(vidId){
     }).then(function(response) {
         // Save commentId array
         var commentIds = response.result.items;
-        console.log(commentIds.length);
+
         $('#numComments').text(commentIds.length);
         // For each comment, call getComment with the commentId
         // Maybe call setModStatus instead
@@ -237,7 +212,6 @@ function getComment(commentId){
         
     }).then(function(response) {
         // var videoIds = response.result.items;
-        console.log(response.result.items[0].snippet);
 
         var userImg = response.result.items[0].snippet.authorProfileImageUrl;
         var author = response.result.items[0].snippet.authorDisplayName;
@@ -246,47 +220,54 @@ function getComment(commentId){
     
         initGapi(commentText, commentId);
         // Display comments
+        if(deleteComments == 1) {// and is checked
+            // setModerationStatus(id);
+            console.log("hi: "+$('[findText="'+content+'"]').prop('checked'));
+        }
+        // else show comment
+        else {
 
-        // Show replies
-        var listItem = $("<li>");
-            listItem.addClass('media');
+            // Show replies
+            var listItem = $("<li>");
+                listItem.addClass('media');
 
-        var commenterImage = $('<div>');
-            commenterImage.addClass('media-left is-hidden-mobile')
-                          .html('<a href=' +  response.result.items[0].snippet.authorChannelUrl + '><img src=' + userImg + ' alt=""></a>');
-        
-            listItem.append(commenterImage);
-
-        var mediaBody = $('<div>');
-            mediaBody.addClass('media-body')
-                     .attr('text', commentText);
-
-
-        var mediaHeading = $('<div>');
-            mediaHeading.addClass('media-heading')
-                        .append('<a href=' + response.result.items[0].snippet.authorChannelUrl + ' class="text-semibold">' + author + '</a>')
-                        // Use library to get how long ago they posted it
-                        // Order comments by data send
-                        .append('<span class="timestamp">2 minutes ago</span>')
-                        
-        var checkBox = $('<input>');
-            checkBox.addClass('check-box')
-                    .attr('type', 'checkbox')
-                    .html('<span class="checkmark"></span>')
-                    .attr('findText', commentText);
-        
-            mediaBody.append(mediaHeading, checkBox)
-                     .append('<p>' + commentText + '</p>');
-        
-        var commentControls = $('<ul>');
-            commentControls.addClass('comment-controls')
-                            .append('<li>' + response.result.items[0].snippet.likeCount + ' ' + '<i class="material-icons">thumb_up</i></a><a href="#"><i class="icon-arrow-down22 text-danger"></i></a></li>');
+            var commenterImage = $('<div>');
+                commenterImage.addClass('media-left is-hidden-mobile')
+                            .html('<a href=' +  response.result.items[0].snippet.authorChannelUrl + '><img src=' + userImg + ' alt=""></a>');
             
-            mediaBody.append(commentControls);
+                listItem.append(commenterImage);
 
-            listItem.append(mediaBody);
+            var mediaBody = $('<div>');
+                mediaBody.addClass('media-body')
+                        .attr('text', commentText);
 
-        $('.comment-list').prepend(listItem);
+
+            var mediaHeading = $('<div>');
+                mediaHeading.addClass('media-heading')
+                            .append('<a href=' + response.result.items[0].snippet.authorChannelUrl + ' class="text-semibold">' + author + '</a>')
+                            // Use library to get how long ago they posted it
+                            // Order comments by data send
+                            .append('<span class="timestamp">2 minutes ago</span>')
+                            
+            var checkBox = $('<input>');
+                checkBox.addClass('check-box')
+                        .attr('type', 'checkbox')
+                        .html('<span class="checkmark"></span>')
+                        .attr('findText', commentText);
+            
+                mediaBody.append(mediaHeading, checkBox)
+                        .append('<p>' + commentText + '</p>');
+            
+            var commentControls = $('<ul>');
+                commentControls.addClass('comment-controls')
+                                .append('<li>' + response.result.items[0].snippet.likeCount + ' ' + '<i class="material-icons">thumb_up</i></a><a href="#"><i class="icon-arrow-down22 text-danger"></i></a></li>');
+                
+                mediaBody.append(commentControls);
+
+                listItem.append(mediaBody);
+
+            $('.comment-list').prepend(listItem);
+        }
     
     });
 }
@@ -318,11 +299,11 @@ function initGapi(content, id) {
         var commentScore = JSON.stringify(r.result.entities[0].sentiment.score);
         console.log(content + " Score: " + commentScore);
 
-        if(deleteComments == 1) {
-            // setModerationStatus(id);
-            console.log("hi: "+$('[findText="'+content+'"]').prop('checked'));
-        }
-        else if(commentScore <= -0.6 && deleteComments == 0) {
+        // if(deleteComments == 1) {
+        //     // setModerationStatus(id);
+        //     console.log("hi: "+$('[findText="'+content+'"]').prop('checked'));
+        // }
+        if(commentScore <= -0.6 && deleteComments == 0) {
 
             $(".media-body:contains(" + content + ")").css('border', '2px solid red');
 
